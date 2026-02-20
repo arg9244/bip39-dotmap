@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIP39 Mnemonic Dot Map Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f0f0f0 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 2rem;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+    
+    .header .subtitle {
+      color: #999;
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+    
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+    }
+    
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid #e5e5e5;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .card-header h2 {
+      font-size: 1rem;
+      color: #444;
+      font-weight: 600;
+    }
+    
+    .card-header p {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .error-msg {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid #fecaca;
+      margin-top: 12px;
+    }
+    
+    .success-msg {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid #bbf7d0;
+      margin-top: 12px;
+    }
+    
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #555;
+      border: 1px solid #ddd;
+    }
+    
+    .btn-secondary:hover {
+      background: #f5f5f5;
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: #888;
+    }
+    
+    .btn-ghost:hover {
+      color: #333;
+    }
+    
+    .btn-success {
+      background: #22c55e;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #16a34a;
+    }
+    
+    .btn-block {
+      width: 100%;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .select-group {
+      margin-bottom: 16px;
+    }
+    
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: white;
+      cursor: pointer;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .how-it-works {
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .how-it-works h3 {
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    
+    .power-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin: 10px 0;
+    }
+    
+    .power-item {
+      background: white;
+      padding: 4px;
+      text-align: center;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      border: 1px solid #e5e5e5;
+    }
+    
+    .canvas-container {
+      display: flex;
+      justify-content: center;
+      background: #fafafa;
+      padding: 20px;
+      border-radius: 8px;
+      min-height: 400px;
+      overflow-x: auto;
+    }
+    
+    #dotMapCanvas {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      color: #aaa;
+    }
+    
+    .empty-state .icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #f0f0f0;
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #666;
+      transition: all 0.2s;
+    }
+    
+    .tab-btn.active {
+      background: white;
+      color: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+    }
+    
+    .word-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    
+    .word-badge .num {
+      color: #aaa;
+      margin-right: 4px;
+      font-size: 0.7rem;
+    }
+    
+    .index-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+    }
+    
+    .index-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #1d4ed8;
+    }
+    
+    .binary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    
+    .binary-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #f8f9fa;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+    
+    .binary-item .num {
+      color: #999;
+      width: 24px;
+    }
+    
+    .binary-item .bin {
+      color: #333;
+      flex: 1;
+    }
+    
+    .binary-item .dec {
+      color: #999;
+    }
+    
+    .tooltip {
+      position: fixed;
+      z-index: 1000;
+      background: #1f2937;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    
+    .tooltip .title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .tooltip .index {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    
+    .tooltip .calc {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    
+    .footer {
+      text-align: center;
+      padding-top: 24px;
+      margin-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      color: #999;
+      font-size: 0.75rem;
+    }
+    
+    .space-y > * + * {
+      margin-top: 16px;
+    }
+    
+    .mt-4 {
+      margin-top: 16px;
+    }
+    
+    .word-count-selector {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .word-count-selector input {
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>BIP39 Mnemonic Dot Map</h1>
+      <p>OneKey Style • Visual backup for your mnemonic phrase</p>
+      <p class="subtitle">Each word encoded as 12 dots representing binary bits (powers of 2: 2048 → 1)</p>
+    </div>
+    
+    <div class="main-grid">
+      <!-- Left Panel -->
+      <div class="space-y">
+        <!-- Input Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Mnemonic Input</h2>
+            <p>Enter your BIP39 mnemonic phrase (any number of words)</p>
+          </div>
+          <div class="card-body">
+            <label for="mnemonicInput">Mnemonic Phrase</label>
+            <textarea id="mnemonicInput" placeholder="Enter words separated by spaces... (e.g., abandon ability able...)"></textarea>
+            <div id="errorMsg" class="error-msg" style="display: none;"></div>
+            <div id="successMsg" class="success-msg" style="display: none;"></div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="validateAndVisualize()">Visualize</button>
+              <button class="btn btn-secondary" onclick="generateRandom()">Generate Random</button>
+              <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+            </div>
+            <div class="word-count-selector">
+              <label for="wordCount" style="margin: 0; font-size: 0.8rem;">Words:</label>
+              <input type="number" id="wordCount" value="24" min="1" max="100">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Options Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Display Options</h2>
+          </div>
+          <div class="card-body">
+            <div class="select-group">
+              <label>Color Scheme</label>
+              <select id="colorScheme" onchange="redraw()">
+                <option value="default">Default (Black & White)</option>
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+              </select>
+            </div>
+            <div class="checkbox-group">
+              <input type="checkbox" id="showLabels" checked onchange="redraw()">
+              <label for="showLabels" style="margin: 0;">Show Title & Legend</label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Export Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Export</h2>
+          </div>
+          <div class="card-body space-y">
+            <button class="btn btn-success btn-block" id="downloadPngBtn" onclick="downloadPNG()" disabled>Download PNG Image</button>
+            <button class="btn btn-primary btn-block" id="downloadPdfBtn" onclick="downloadPDF()" disabled>Download PDF Document</button>
+          </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="how-it-works">
+          <h3>How It Works</h3>
+          <p>Each BIP39 word has an index (0-2047). This index is converted to 12 dots:</p>
+          <div class="power-grid">
+            <div class="power-item">2048</div>
+            <div class="power-item">1024</div>
+            <div class="power-item">512</div>
+            <div class="power-item">256</div>
+            <div class="power-item">128</div>
+            <div class="power-item">64</div>
+            <div class="power-item">32</div>
+            <div class="power-item">16</div>
+            <div class="power-item">8</div>
+            <div class="power-item">4</div>
+            <div class="power-item">2</div>
+            <div class="power-item">1</div>
+          </div>
+          <p>● Filled dot = that power of 2 is included</p>
+          <p>○ Empty dot = that power of 2 is not included</p>
+        </div>
+      </div>
+      
+      <!-- Right Panel -->
+      <div class="space-y">
+        <!-- Canvas Card -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Dot Map Visualization</h2>
+            <p>Hover over rows to see word details</p>
+          </div>
+          <div class="card-body">
+            <div class="canvas-container" id="canvasContainer">
+              <div class="empty-state" id="emptyState">
+                <div class="icon">◎</div>
+                <p>Enter or generate a mnemonic phrase<br>to see the OneKey-style dot map</p>
+              </div>
+              <canvas id="dotMapCanvas" style="display: none;"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Details Card -->
+        <div class="card" id="detailsCard" style="display: none;">
+          <div class="card-header">
+            <h2>Mnemonic Details</h2>
+          </div>
+          <div class="card-body">
+            <div class="tabs">
+              <button class="tab-btn active" onclick="showTab('words')">Words</button>
+              <button class="tab-btn" onclick="showTab('indices')">Indices</button>
+              <button class="tab-btn" onclick="showTab('binary')">Binary</button>
+            </div>
+            
+            <div id="wordsTab" class="tab-content active">
+              <div class="word-grid" id="wordGrid"></div>
+            </div>
+            
+            <div id="indicesTab" class="tab-content">
+              <div class="index-grid" id="indexGrid"></div>
+            </div>
+            
+            <div id="binaryTab" class="tab-content">
+              <div class="binary-grid" id="binaryGrid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <p>⚠️ This tool is for educational and visualization purposes only.</p>
+      <p>Never share your actual mnemonic phrase. Generated mnemonics are for demonstration only.</p>
+      <p style="margin-top: 8px;">BIP39 Word List: 2048 words | Standard for cryptocurrency seed phrases</p>
+    </div>
+  </div>
+  
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip" style="display: none;"></div>
+
+  <script>
+    // BIP39 Word List (2048 words) - Public standard wordlist
+    const BIP39_WORDLIST = [
+      "abandon","ability","able","about","above","absent","absorb","abstract","absurd","abuse","access","accident","account","accuse","achieve","acid","acoustic","acquire","across","act","action","actor","actress","actual","adapt","add","addict","address","adjust","admit","adult","advance","advice","aerobic","affair","afford","afraid","again","age","agent","agree","ahead","aim","air","airport","aisle","alarm","album","alcohol","alert","alien","all","alley","allow","almost","alone","alpha","already","also","alter","always","amateur","amazing","among","amount","amused","analyst","anchor","ancient","anger","angle","angry","animal","ankle","announce","annual","another","answer","antenna","antique","anxiety","any","apart","apology","appear","apple","approve","april","arch","arctic","area","arena","argue","arm","armed","armor","army","around","arrange","arrest","arrive","arrow","art","artefact","artist","artwork","ask","aspect","assault","asset","assist","assume","asthma","athlete","atom","attack","attend","attitude","attract","auction","audit","august","aunt","author","auto","autumn","average","avocado","avoid","awake","aware","away","awesome","awful","awkward","axis","baby","bachelor","bacon","badge","bag","balance","balcony","ball","bamboo","banana","banner","bar","barely","bargain","barrel","base","basic","basket","battle","beach","bean","beauty","because","become","beef","before","begin","behave","behind","believe","below","belt","bench","benefit","best","betray","better","between","beyond","bicycle","bid","bike","bind","biology","bird","birth","bitter","black","blade","blame","blanket","blast","bleak","bless","blind","blood","blossom","blouse","blue","blur","blush","board","boat","body","boil","bomb","bone","bonus","book","boost","border","boring","borrow","boss","bottom","bounce","box","boy","bracket","brain","brand","brass","brave","bread","breeze","brick","bridge","brief","bright","bring","brisk","broccoli","broken","bronze","broom","brother","brown","brush","bubble","buddy","budget","buffalo","build","bulb","bulk","bullet","bundle","bunker","burden","burger","burst","bus","business","busy","butter","buyer","buzz","cabbage","cabin","cable","cactus","cage","cake","call","calm","camera","camp","can","canal","cancel","candy","cannon","canoe","canvas","canyon","capable","capital","captain","car","carbon","card","cargo","carpet","carry","cart","case","cash","casino","castle","casual","cat","catalog","catch","category","cattle","caught","cause","caution","cave","ceiling","celery","cement","census","century","cereal","certain","chair","chalk","challenge","chamber","champion","channel","chaos","chapter","charge","chase","chat","cheap","check","cheese","chef","cherry","chest","chicken","chief","child","chimney","choice","choose","chronic","chuckle","chunk","churn","cigar","cinnamon","circle","citizen","city","civil","claim","clap","clarify","claw","clay","clean","clerk","clever","click","client","cliff","climb","clinic","clip","clock","clog","close","cloth","cloud","clown","club","clump","cluster","clutch","coach","coast","coconut","code","coffee","coil","coin","collect","color","column","combine","come","comfort","comic","common","company","concert","conduct","confirm","congress","connect","consider","consume","contact","contain","contest","context","contract","contrast","control","convert","convince","cook","cool","copper","copy","coral","core","corn","correct","cost","cotton","couch","country","couple","course","cousin","cover","coyote","crack","cradle","craft","cram","crane","crash","crater","crawl","crazy","cream","credit","creek","crew","cricket","crime","crisp","critic","crop","cross","crouch","crowd","crucial","cruel","cruise","crumble","crunch","crush","cry","crystal","cube","culture","cup","cupboard","curious","current","curtain","curve","cushion","custom","cute","cycle","dad","damage","damp","dance","danger","daring","dash","daughter","dawn","day","deal","debate","debris","decade","december","decide","decline","decorate","decrease","deer","defense","define","defy","degree","delay","deliver","demand","demise","denial","dentist","deny","depart","depend","deposit","depth","deputy","derive","describe","desert","design","desk","despair","destiny","destroy","detach","detect","develop","device","devote","diagram","dial","diamond","diary","dice","diesel","diet","differ","digital","dignity","dilemma","dinner","dinosaur","direct","dirt","disagree","discover","disease","dish","dismiss","disorder","display","distance","divert","divide","divorce","dizzy","doctor","document","dog","doll","dolphin","domain","donate","donkey","donor","door","dose","double","dove","draft","dragon","drama","drastic","draw","dream","dress","drift","drill","drink","drip","drive","drop","drum","dry","duck","dumb","dune","during","dust","dutch","duty","dwarf","dynamic","eager","eagle","early","earn","earth","easily","east","easy","echo","ecology","economy","edge","edit","educate","effort","egg","eight","either","elbow","elder","electric","elegant","element","elephant","elevator","elite","else","embark","embody","embrace","emerge","emotion","employ","empower","empty","enable","enact","end","endless","endorse","enemy","energy","enforce","engage","engine","enhance","enjoy","enlist","enough","enrich","enroll","ensure","enter","entire","entrance","entry","envelope","episode","equal","equip","era","erase","erode","erosion","error","erupt","escape","essay","essence","estate","eternal","ethics","evidence","evil","evoke","evolve","exact","example","excess","exchange","excite","exclude","excuse","execute","exercise","exhaust","exhibit","exile","exist","exit","exotic","expand","expect","expire","explain","expose","express","extend","extra","eye","eyebrow","fabric","face","faculty","fade","faint","faith","fall","false","fame","family","famous","fan","fancy","fantasy","farm","fashion","fat","fatal","father","fatigue","fault","favorite","feature","february","federal","fee","feed","feel","female","fence","festival","fever","few","fiber","fiction","field","figure","file","film","filter","final","find","fine","finger","finish","fire","firm","first","fiscal","fish","fit","fitness","fix","flag","flame","flash","flat","flavor","flee","flight","flip","float","flock","flood","floor","flower","fluid","flush","fly","foam","focus","fog","foil","fold","follow","food","foot","force","forest","forget","fork","fortune","forum","forward","fossil","foster","found","fox","fragile","frame","frequent","fresh","friend","fringe","frog","front","frost","frown","frozen","fruit","fuel","fun","funny","furnace","fury","future","gadget","gain","galaxy","gallery","game","gap","garage","garbage","garden","garlic","garment","gas","gasp","gate","gather","gauge","gaze","general","genius","genre","gentle","genuine","gesture","ghost","giant","gift","giggle","ginger","giraffe","girl","give","glad","glance","glare","glass","glide","glimpse","globe","gloom","glory","glove","glow","glue","goat","goddess","gold","good","goose","gorilla","gospel","gossip","govern","gown","grab","grace","grain","grant","grape","grass","gravity","great","green","grid","grief","grit","grocery","group","grow","grunt","guard","guess","guide","guilt","guitar","gun","gym","habit","hair","half","hammer","hamster","hand","happy","harbor","hard","harsh","harvest","hat","have","hawk","hazard","head","health","heart","heavy","hedgehog","height","hello","helmet","help","hen","hero","hidden","high","hill","hint","hip","hire","history","hobby","hockey","hold","hole","holiday","hollow","home","honey","hood","hope","horn","horror","horse","hospital","host","hotel","hour","hover","hub","huge","human","humble","humor","hundred","hungry","hunt","hurdle","hurry","hurt","husband","hybrid","ice","icon","idea","identify","idle","ignore","ill","illegal","illness","image","imitate","immense","immune","impact","impose","improve","impulse","inch","include","income","increase","index","indicate","indoor","industry","infant","inflict","inform","inhale","inherit","initial","inject","injury","inmate","inner","innocent","input","inquiry","insane","insect","inside","inspire","install","intact","interest","into","invest","invite","involve","iron","island","isolate","issue","item","ivory","jacket","jaguar","jar","jasmine","java","jazz","jeans","jelly","jewel","job","join","joke","journey","joy","judge","juice","jump","jungle","junior","junk","just","kangaroo","keen","keep","ketchup","key","kick","kid","kidney","kind","kingdom","kiss","kit","kitchen","kite","kitten","kiwi","knee","knife","knock","know","lab","label","labor","ladder","lady","lake","lamp","language","laptop","large","later","latin","laugh","lava","lawn","lawsuit","layer","lazy","leader","leaf","learn","leave","lecture","left","leg","legal","legend","leisure","lemon","lend","length","lens","leopard","lesson","letter","level","liar","liberty","library","license","life","lift","light","like","limb","limit","link","lion","liquid","list","little","live","lizard","load","loan","lobster","local","lock","logic","lonely","long","loop","lottery","loud","lounge","love","loyal","lucky","luggage","lumber","lunar","lunch","luxury","lyrics","machine","mad","magic","magnet","maid","mail","main","major","make","mammal","man","manage","mandate","mango","mansion","manual","maple","marble","march","margin","marine","market","marriage","mask","mass","master","match","material","math","matrix","matter","maximum","maze","meadow","mean","measure","meat","mechanic","medal","media","melody","melt","member","memory","mention","menu","mercy","merge","merit","merry","mesh","message","metal","method","middle","midnight","milk","million","mimic","mind","minimum","minor","minute","miracle","mirror","misery","miss","mistake","mix","mixed","mixture","mobile","model","modify","mom","moment","monitor","monkey","monster","month","moon","moral","more","morning","mosquito","mother","motion","motor","mountain","mouse","move","movie","much","muffin","mule","muscle","museum","mushroom","music","must","mutual","myself","mystery","myth","naive","name","napkin","narrow","nasty","nation","natural","nature","near","neck","need","negative","neglect","neither","nephew","nerve","nest","net","network","neutral","never","news","next","nice","night","noble","noise","nominee","noodle","normal","north","nose","notable","note","nothing","notice","novel","now","nuclear","number","nurse","nut","oak","obey","object","oblige","obscure","observe","obtain","obvious","occur","ocean","october","odor","off","offer","often","oil","okay","old","olive","olympic","omit","once","one","onion","online","only","open","opera","opinion","oppose","option","orange","orbit","orchard","order","ordinary","organ","orient","original","orphan","ostrich","other","outdoor","outer","output","outside","oval","oven","over","own","owner","oxygen","oyster","ozone","pact","paddle","page","pair","palace","palm","panda","panel","panic","panther","paper","parade","parent","park","parrot","party","pass","patch","path","patient","patrol","pattern","pause","pave","payment","peace","peanut","pear","peasant","pelican","pen","penalty","pencil","people","pepper","perfect","permit","person","pet","phone","photo","phrase","physical","piano","picnic","picture","piece","pig","pigeon","pill","pilot","pink","pioneer","pipe","pistol","pitch","pizza","place","planet","plastic","plate","play","please","pledge","pluck","plug","plunge","poem","poet","point","polar","pole","police","pond","pony","pool","popular","portion","position","possible","post","potato","pottery","poverty","powder","power","practice","praise","predict","prefer","prepare","present","pretty","prevent","price","pride","primary","print","priority","prison","private","prize","problem","process","produce","profit","program","project","promote","proof","property","prosper","protect","proud","provide","public","pudding","pull","pulp","pulse","pumpkin","punch","pupil","puppy","purchase","purity","purpose","purse","push","put","puzzle","pyramid","quality","quantum","quarter","question","quick","quit","quiz","quote","rabbit","raccoon","race","rack","radar","radio","rail","rain","raise","rally","ramp","ranch","random","range","rapid","rare","rate","rather","raven","raw","razor","ready","real","reason","rebel","rebuild","recall","receive","recipe","record","recycle","reduce","reflect","reform","refuge","refuse","regret","relate","relax","release","relief","rely","remain","remember","remind","remove","render","renew","rent","reopen","repair","repeat","replace","report","require","rescue","resemble","resist","resource","response","result","retire","retreat","return","reunion","reveal","review","reward","rhythm","rib","ribbon","rice","rich","ride","ridge","rifle","right","rigid","ring","riot","ripple","risk","ritual","rival","river","road","roast","robot","robust","rocket","romance","roof","rookie","room","rose","rotate","rough","round","route","royal","rubber","rude","rug","rule","run","runway","rural","sad","saddle","sadness","safe","sail","salad","salmon","salon","salt","salute","same","sample","sand","satisfy","satoshi","sauce","sausage","save","say","scale","scan","scare","scatter","scene","scheme","school","science","scissors","scorpion","scout","scrap","screen","script","scrub","sea","search","season","seat","second","secret","section","security","seed","seek","segment","select","sell","seminar","senior","sense","sentence","series","service","session","settle","setup","seven","shadow","shaft","shallow","share","shed","shell","sheriff","shield","shift","shine","ship","shiver","shock","shoe","shoot","shop","short","shoulder","shove","shrimp","shrug","shuffle","shut","shy","sibling","sick","side","siege","sight","sign","silent","silk","silly","silver","similar","simple","since","sing","siren","sister","situate","six","size","skate","sketch","ski","skill","skin","skirt","skull","slab","slam","sleep","slender","slice","slide","slight","slim","slogan","slot","slow","slush","small","smart","smile","smoke","smooth","snack","snake","snap","sniff","snow","soap","soccer","social","sock","soda","soft","solar","soldier","solid","solution","solve","someone","song","soon","sorry","sort","soul","sound","soup","source","south","space","spare","spatial","spawn","speak","special","speed","spell","spend","sphere","spice","spider","spike","spin","spirit","split","spoil","sponsor","spoon","sport","spot","spray","spread","spring","spy","square","squeeze","squirrel","stable","stadium","staff","stage","stairs","stake","stamp","stand","start","state","stay","steak","steel","stem","step","stereo","stick","still","sting","stock","stomach","stone","stool","story","stove","strategy","street","strike","strong","struggle","student","stuff","stumble","style","subject","submit","subway","success","such","sudden","suffer","sugar","suggest","suit","summer","sun","sunny","sunset","super","supply","supreme","sure","surface","surge","surprise","surround","survey","suspect","sustain","swallow","swamp","swap","swarm","swear","sweet","swift","swim","swing","switch","sword","symbol","symptom","syrup","system","table","tackle","tag","tail","talent","talk","tank","tape","target","task","taste","tattoo","taxi","teach","team","tell","ten","tenant","tennis","tent","term","test","text","thank","that","theme","then","theory","there","they","thing","this","thought","three","thrive","throw","thumb","thunder","ticket","tide","tiger","tilt","timber","time","tiny","tip","tired","tissue","title","toast","tobacco","today","toddler","toe","toilet","token","tomato","tomorrow","tone","tongue","tonight","tool","tooth","top","topic","topple","torch","tornado","tortoise","toss","total","touch","tour","toward","tower","town","toy","track","trade","traffic","tragic","train","transfer","trap","trash","travel","tray","treat","tree","trend","trial","tribe","trick","trigger","trim","trip","trophy","trouble","truck","true","truly","trumpet","trust","truth","try","tube","tuition","tumble","tuna","tunnel","turkey","turn","turtle","twelve","twenty","twice","twin","twist","two","type","typical","ugly","umbrella","unable","unaware","uncle","uncover","under","undo","unfair","unfold","unhappy","uniform","unique","unit","universe","unknown","unlock","until","unusual","unveil","update","upgrade","uphold","upon","upper","upset","urban","urge","usage","use","used","useful","useless","usual","utility","vacant","vacuum","vague","valid","valley","valve","van","vanish","vapor","various","vast","vault","vegetable","velvet","vendor","venture","venue","verb","verify","version","very","vessel","veteran","viable","vibrant","vicious","victory","video","view","village","vintage","violin","virtual","virus","visa","visit","visual","vital","vivid","vocal","voice","void","volcano","volume","vote","voyage","wage","wagon","wait","walk","wall","walnut","want","warfare","warm","warrior","wash","wasp","waste","water","wave","way","wealth","weapon","wear","weasel","weather","web","wedding","weekend","weird","welcome","west","wet","whale","what","wheat","wheel","when","where","whip","whisper","wide","width","wife","wild","will","win","window","wine","wing","wink","winner","winter","wire","wisdom","wise","wish","witness","wolf","woman","wonder","wood","wool","word","work","world","worry","worth","wrap","wreck","wrestle","wrist","write","wrong","yard","year","yellow","you","young","youth","zebra","zero","zone","zoo"
+    ];
+    
+    // Create word to index map
+    const WORD_TO_INDEX = new Map(BIP39_WORDLIST.map((word, index) => [word, index]));
+    
+    // Powers of 2 for each dot position
+    const DOT_POWERS = [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1];
+    
+    // State
+    let words = [];
+    let indices = [];
+    let hoveredWord = null;
+    
+    // Get word index
+    function getWordIndex(word) {
+      return WORD_TO_INDEX.get(word.toLowerCase().trim());
+    }
+    
+    // Convert index to dot pattern
+    function indexToDotPattern(index) {
+      const pattern = [];
+      let remaining = index;
+      for (const power of DOT_POWERS) {
+        if (remaining >= power) {
+          pattern.push(true);
+          remaining -= power;
+        } else {
+          pattern.push(false);
+        }
+      }
+      return pattern;
+    }
+    
+    // Get active powers
+    function getActivePowers(index) {
+      const active = [];
+      let remaining = index;
+      for (const power of DOT_POWERS) {
+        if (remaining >= power) {
+          active.push(power);
+          remaining -= power;
+        }
+      }
+      return active;
+    }
+    
+    // Binary representation
+    function indexToBinary(index) {
+      return index.toString(2).padStart(11, '0');
+    }
+    
+    // Validate mnemonic
+    function validateMnemonic(mnemonic) {
+      const wordList = mnemonic.toLowerCase().trim().split(/\s+/).filter(w => w.length > 0);
+      
+      if (wordList.length === 0) {
+        return { valid: false, error: 'Please enter at least one word' };
+      }
+      
+      const invalidWords = [];
+      for (const word of wordList) {
+        if (!WORD_TO_INDEX.has(word)) {
+          invalidWords.push(word);
+        }
+      }
+      
+      if (invalidWords.length > 0) {
+        return { valid: false, error: `Invalid BIP39 words: ${invalidWords.slice(0, 5).join(', ')}${invalidWords.length > 5 ? '...' : ''}` };
+      }
+      
+      return { valid: true, words: wordList };
+    }
+    
+    // Generate random mnemonic
+    function generateRandomMnemonic(count) {
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const randomIndex = Math.floor(Math.random() * BIP39_WORDLIST.length);
+        result.push(BIP39_WORDLIST[randomIndex]);
+      }
+      return result;
+    }
+    
+    // Show error
+    function showError(msg) {
+      const errorEl = document.getElementById('errorMsg');
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+    
+    // Show success
+    function showSuccess(msg) {
+      const successEl = document.getElementById('successMsg');
+      successEl.textContent = msg;
+      successEl.style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+    
+    // Hide messages
+    function hideMessages() {
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+    
+    // Validate and visualize
+    function validateAndVisualize() {
+      const input = document.getElementById('mnemonicInput').value;
+      const result = validateMnemonic(input);
+      
+      if (result.valid) {
+        hideMessages();
+        words = result.words;
+        indices = words.map(w => getWordIndex(w));
+        showSuccess(`Valid BIP39 mnemonic with ${words.length} word${words.length !== 1 ? 's' : ''}`);
+        updateUI();
+      } else {
+        showError(result.error);
+        words = [];
+        indices = [];
+        updateUI();
+      }
+    }
+    
+    // Generate random
+    function generateRandom() {
+      const count = parseInt(document.getElementById('wordCount').value) || 24;
+      const safeCount = Math.max(1, Math.min(100, count));
+      document.getElementById('wordCount').value = safeCount;
+      
+      words = generateRandomMnemonic(safeCount);
+      indices = words.map(w => getWordIndex(w));
+      document.getElementById('mnemonicInput').value = words.join(' ');
+      hideMessages();
+      showSuccess(`Generated random mnemonic with ${words.length} word${words.length !== 1 ? 's' : ''}`);
+      updateUI();
+    }
+    
+    // Clear all
+    function clearAll() {
+      words = [];
+      indices = [];
+      document.getElementById('mnemonicInput').value = '';
+      hideMessages();
+      updateUI();
+    }
+    
+    // Update UI
+    function updateUI() {
+      const hasWords = words.length > 0;
+      
+      // Enable/disable buttons
+      document.getElementById('downloadPngBtn').disabled = !hasWords;
+      document.getElementById('downloadPdfBtn').disabled = !hasWords;
+      
+      // Show/hide canvas and details
+      document.getElementById('emptyState').style.display = hasWords ? 'none' : 'flex';
+      document.getElementById('dotMapCanvas').style.display = hasWords ? 'block' : 'none';
+      document.getElementById('detailsCard').style.display = hasWords ? 'block' : 'none';
+      
+      if (hasWords) {
+        redraw();
+        updateDetails();
+      }
+    }
+    
+    // Redraw canvas
+    function redraw() {
+      if (words.length === 0) return;
+      
+      const canvas = document.getElementById('dotMapCanvas');
+      const ctx = canvas.getContext('2d');
+      const colorScheme = document.getElementById('colorScheme').value;
+      const showLabels = document.getElementById('showLabels').checked;
+      
+      // Colors
+      const colors = {
+        default: {
+          background: '#ffffff',
+          cardBg: '#f8f9fa',
+          cardBorder: '#e9ecef',
+          dotEmpty: '#dee2e6',
+          dotFilled: '#000000',
+          text: '#212529',
+          textSecondary: '#6c757d',
+          textMuted: '#adb5bd'
+        },
+        dark: {
+          background: '#1a1a2e',
+          cardBg: '#16213e',
+          cardBorder: '#0f3460',
+          dotEmpty: '#2d3748',
+          dotFilled: '#e94560',
+          text: '#eaeaea',
+          textSecondary: '#a0a0a0',
+          textMuted: '#6c6c6c'
+        },
+        light: {
+          background: '#f5f5f5',
+          cardBg: '#ffffff',
+          cardBorder: '#d1d5db',
+          dotEmpty: '#e5e7eb',
+          dotFilled: '#2563eb',
+          text: '#1f2937',
+          textSecondary: '#6b7280',
+          textMuted: '#9ca3af'
+        }
+      };
+      
+      const c = colors[colorScheme];
+      
+      // Canvas dimensions
+      const width = 700;
+      const cardHeight = 36;
+      const cardGap = 2;
+      const topPadding = showLabels ? 70 : 20;
+      const height = topPadding + words.length * (cardHeight + cardGap) + 50;
+      const padding = 30;
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Clear
+      ctx.fillStyle = c.background;
+      ctx.fillRect(0, 0, width, height);
+      
+      // Title
+      if (showLabels) {
+        ctx.fillStyle = c.text;
+        ctx.font = 'bold 22px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('BIP39 Mnemonic Dot Map', width / 2, 32);
+        
+        ctx.fillStyle = c.textSecondary;
+        ctx.font = '13px Arial, sans-serif';
+        ctx.fillText(`OneKey Style • ${words.length} word${words.length !== 1 ? 's' : ''} • 12 dots per word`, width / 2, 52);
+      }
+      
+      // Power labels
+      const headerY = topPadding - 8;
+      ctx.fillStyle = c.textMuted;
+      ctx.font = '10px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      
+      const wordNumWidth = 40;
+      const cardPadding = 12;
+      const dotRadius = 6;
+      const dotGap = 10;
+      const dotsStartX = padding + wordNumWidth + cardPadding;
+      
+      DOT_POWERS.forEach((power, i) => {
+        const x = dotsStartX + i * (dotRadius * 2 + dotGap) + dotRadius;
+        ctx.fillText(power.toString(), x, headerY);
+      });
+      
+      // Draw rows
+      words.forEach((word, i) => {
+        const y = topPadding + i * (cardHeight + cardGap);
+        const idx = indices[i];
+        const isHovered = hoveredWord === i;
+        
+        // Card background
+        ctx.fillStyle = isHovered ? c.dotFilled + '15' : c.cardBg;
+        ctx.strokeStyle = isHovered ? c.dotFilled : c.cardBorder;
+        ctx.lineWidth = isHovered ? 2 : 1;
+        
+        roundRect(ctx, padding, y, width - padding * 2, cardHeight, 6);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Word number
+        ctx.fillStyle = c.textMuted;
+        ctx.font = '12px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${i + 1}.`, padding + cardPadding, y + cardHeight / 2 + 4);
+        
+        // Dots
+        const pattern = indexToDotPattern(idx);
+        pattern.forEach((isFilled, dotIdx) => {
+          const x = dotsStartX + dotIdx * (dotRadius * 2 + dotGap);
+          const dotY = y + cardHeight / 2;
+          
+          ctx.beginPath();
+          ctx.arc(x + dotRadius, dotY, dotRadius, 0, Math.PI * 2);
+          ctx.fillStyle = isFilled ? c.dotFilled : c.dotEmpty;
+          ctx.fill();
+        });
+        
+        // Word and index
+        ctx.fillStyle = c.text;
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(word, width - padding - cardPadding - 50, y + cardHeight / 2 + 4);
+        
+        ctx.fillStyle = c.textSecondary;
+        ctx.font = '10px monospace';
+        ctx.fillText(`(${idx})`, width - padding - cardPadding, y + cardHeight / 2 + 4);
+      });
+      
+      // Legend
+      const legendY = topPadding + words.length * (cardHeight + cardGap) + 20;
+      
+      ctx.fillStyle = c.textSecondary;
+      ctx.font = '11px Arial, sans-serif';
+      ctx.textAlign = 'left';
+      
+      // Filled dot
+      ctx.beginPath();
+      ctx.arc(padding + 10, legendY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = c.dotFilled;
+      ctx.fill();
+      
+      ctx.fillStyle = c.text;
+      ctx.fillText('= Bit is 1', padding + 25, legendY + 4);
+      
+      // Empty dot
+      ctx.beginPath();
+      ctx.arc(padding + 120, legendY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = c.dotEmpty;
+      ctx.fill();
+      
+      ctx.fillStyle = c.text;
+      ctx.fillText('= Bit is 0', padding + 135, legendY + 4);
+    }
+    
+    // Rounded rectangle helper
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+    
+    // Update details tabs
+    function updateDetails() {
+      // Words grid
+      const wordGrid = document.getElementById('wordGrid');
+      wordGrid.innerHTML = words.map((w, i) => 
+        `<div class="word-badge"><span class="num">${i + 1}.</span>${w}</div>`
+      ).join('');
+      
+      // Indices grid
+      const indexGrid = document.getElementById('indexGrid');
+      indexGrid.innerHTML = indices.map((idx, i) => 
+        `<div class="index-badge"><span class="num">${i + 1}:</span>${idx}</div>`
+      ).join('');
+      
+      // Binary grid
+      const binaryGrid = document.getElementById('binaryGrid');
+      binaryGrid.innerHTML = indices.map((idx, i) => 
+        `<div class="binary-item"><span class="num">${i + 1}.</span><span class="bin">${indexToBinary(idx)}</span><span class="dec">(${idx})</span></div>`
+      ).join('');
+    }
+    
+    // Show tab
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+    
+    // Canvas mouse events
+    document.getElementById('dotMapCanvas').addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const showLabels = document.getElementById('showLabels').checked;
+      
+      const topPadding = showLabels ? 70 : 20;
+      const cardHeight = 36;
+      const cardGap = 2;
+      
+      const wordIndex = Math.floor((y - topPadding) / (cardHeight + cardGap));
+      
+      if (wordIndex >= 0 && wordIndex < words.length && e.clientX >= rect.left + 30 && e.clientX <= rect.right - 30) {
+        if (hoveredWord !== wordIndex) {
+          hoveredWord = wordIndex;
+          redraw();
+        }
+        
+        // Show tooltip
+        const tooltip = document.getElementById('tooltip');
+        const activePowers = getActivePowers(indices[wordIndex]);
+        
+        tooltip.innerHTML = `
+          <div class="title">Word ${wordIndex + 1}: "${words[wordIndex]}"</div>
+          <div class="index">Index: ${indices[wordIndex]} (Binary: ${indexToBinary(indices[wordIndex])})</div>
+          <div class="calc">Active bits: ${activePowers.length > 0 ? activePowers.join(' + ') + ' = ' + indices[wordIndex] : '0'}</div>
+        `;
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.clientX + 15) + 'px';
+        tooltip.style.top = (e.clientY + 15) + 'px';
+      } else {
+        if (hoveredWord !== null) {
+          hoveredWord = null;
+          redraw();
+        }
+        document.getElementById('tooltip').style.display = 'none';
+      }
+    });
+    
+    document.getElementById('dotMapCanvas').addEventListener('mouseleave', function() {
+      hoveredWord = null;
+      redraw();
+      document.getElementById('tooltip').style.display = 'none';
+    });
+    
+    // Download PNG
+    function downloadPNG() {
+      const canvas = document.getElementById('dotMapCanvas');
+      const link = document.createElement('a');
+      link.download = `bip39-dotmap-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // Download PDF
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const canvas = document.getElementById('dotMapCanvas');
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Title
+      doc.setFontSize(22);
+      doc.text('BIP39 Mnemonic Dot Map', 105, 20, { align: 'center' });
+      
+      doc.setFontSize(11);
+      doc.setTextColor(100);
+      doc.text(`OneKey Style - ${words.length} word${words.length !== 1 ? 's' : ''} - 12 dots per word`, 105, 28, { align: 'center' });
+      
+      // Image - scale to fit page
+      const imgWidth = 180;
+      const imgHeight = (canvas.height / canvas.width) * imgWidth;
+      const maxY = 270;
+      const scaledHeight = Math.min(imgHeight, maxY - 35);
+      const scaledWidth = (scaledHeight / imgHeight) * imgWidth;
+      const xOffset = (210 - scaledWidth) / 2;
+      
+      doc.addImage(imgData, 'PNG', xOffset, 35, scaledWidth, scaledHeight);
+      
+      // Word list on new page if needed
+      let yPos = 40 + scaledHeight + 10;
+      
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0);
+      doc.text('Mnemonic Words', 15, yPos);
+      yPos += 8;
+      
+      doc.setFontSize(8);
+      words.forEach((word, i) => {
+        const pattern = indexToDotPattern(indices[i]).map(d => d ? '1' : '0').join('');
+        const activePowers = getActivePowers(indices[i]);
+        const calc = activePowers.length > 0 ? activePowers.join('+') : '0';
+        
+        doc.text(`${i + 1}. ${word} (${indices[i]}) - ${pattern} - ${calc.length > 25 ? calc.substring(0, 25) + '...' : calc}`, 15, yPos);
+        yPos += 4;
+        
+        if (yPos > 285) {
+          doc.addPage();
+          yPos = 20;
+        }
+      });
+      
+      // How to read
+      yPos += 8;
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFontSize(11);
+      doc.text('How to Read', 15, yPos);
+      yPos += 6;
+      
+      doc.setFontSize(8);
+      doc.text('Each dot represents a power of 2: 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1', 15, yPos);
+      yPos += 4;
+      doc.text('Filled dot (1) = that power is included. Empty dot (0) = not included.', 15, yPos);
+      
+      doc.save(`bip39-dotmap-${Date.now()}.pdf`);
+    }
+  </script>
+</body>
+</html>
