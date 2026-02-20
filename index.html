@@ -525,7 +525,7 @@
         <!-- How It Works -->
         <div class="how-it-works">
           <h3>How It Works</h3>
-          <p>Each BIP39 word has an index (0-2047). This index is converted to 12 dots:</p>
+          <p>Each BIP39 word has an index (1-2048). This index is converted to 12 dots:</p>
           <div class="power-grid">
             <div class="power-item">2048</div>
             <div class="power-item">1024</div>
@@ -901,7 +901,7 @@
         
         ctx.fillStyle = c.textSecondary;
         ctx.font = '10px monospace';
-        ctx.fillText(`(${idx})`, width - padding - cardPadding, y + cardHeight / 2 + 4);
+        ctx.fillText(`(${idx + 1})`, width - padding - cardPadding, y + cardHeight / 2 + 4);
       });
       
       // Legend
@@ -956,13 +956,13 @@
       // Indices grid
       const indexGrid = document.getElementById('indexGrid');
       indexGrid.innerHTML = indices.map((idx, i) => 
-        `<div class="index-badge"><span class="num">${i + 1}:</span>${idx}</div>`
+        `<div class="index-badge"><span class="num">${i + 1}:</span>${idx + 1}</div>`
       ).join('');
       
       // Binary grid
       const binaryGrid = document.getElementById('binaryGrid');
       binaryGrid.innerHTML = indices.map((idx, i) => 
-        `<div class="binary-item"><span class="num">${i + 1}.</span><span class="bin">${indexToBinary(idx)}</span><span class="dec">(${idx})</span></div>`
+        `<div class="binary-item"><span class="num">${i + 1}.</span><span class="bin">${indexToBinary(idx)}</span><span class="dec">(${idx + 1})</span></div>`
       ).join('');
     }
     
@@ -999,7 +999,7 @@
         
         tooltip.innerHTML = `
           <div class="title">Word ${wordIndex + 1}: "${words[wordIndex]}"</div>
-          <div class="index">Index: ${indices[wordIndex]} (Binary: ${indexToBinary(indices[wordIndex])})</div>
+          <div class="index">Index: ${indices[wordIndex] + 1} (Binary: ${indexToBinary(indices[wordIndex])})</div>
           <div class="calc">Active bits: ${activePowers.length > 0 ? activePowers.join(' + ') + ' = ' + indices[wordIndex] : '0'}</div>
         `;
         tooltip.style.display = 'block';
