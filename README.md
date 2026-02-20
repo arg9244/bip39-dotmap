@@ -3,7 +3,7 @@
 A single-file web application that generates OneKey-style visual dot maps for BIP 39 mnemonic phrases.
 ## 🌐 Live Demo
 
-## https://arg9244.github.io/bip39-dotmap/
+## https://arg9244.github.io/bip39-dotmap
 
 ## ✨ Features
 
